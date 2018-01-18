@@ -666,6 +666,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
   //uses switch to select card and perform actions
   switch( card ) 
     {
+    //adventurerEffect(drawntreasure, currentPlayer, state, temphand);
     case adventurer:
       while(drawntreasure<2){
 	if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
@@ -1330,4 +1331,43 @@ int updateCoins(int player, struct gameState *state, int bonus)
 
 
 //end of dominion.c
+
+/**************************************************************************************
+** Function: Function to create the effects associated with an adventurer card
+**************************************************************************************/
+void adventurerEffect(int drawntreasure, int currentPlayer, struct * state, int [] temphand);
+{
+    while(drawntreasure < 2)
+    {
+        // If the deck is empty we need to shuffle discard and add to deck
+	    if (state->deckCount[currentPlayer] < 1) 
+	        shuffle(currentPlayer, state);
+	    
+        drawCard(currentPlayer, state);
+
+        // Top card of hand is most recently drawn card.
+	    cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer] - 1];
+
+	    if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+	        drawntreasure++;
+	    else
+        {
+            // Save drawn card so it can be removed
+	        temphand[z] = cardDrawn;
+
+            // Remove the top card (the most recently drawn one).
+	        state->handCount[currentPlayer]--; 
+	        z++;
+	    }
+    }
+      
+    while(z - 1 >= 0)
+    {
+        // Discard all cards in play that have been drawn
+	    state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z - 1]; 
+	    z = z - 1;
+    }
+    
+    return 0;
+}
 
