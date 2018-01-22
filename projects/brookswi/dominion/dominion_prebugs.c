@@ -1289,7 +1289,7 @@ int updateCoins(int player, struct gameState *state, int bonus)
 void adventurerEffect(int drawntreasure, int currentPlayer, struct gameState *state, int temphand[], int z)
 {
     int cardDrawn;
-    while(drawntreasure < 3)
+    while(drawntreasure < 2)
     {
         // If the deck is empty we need to shuffle discard and add to deck
 	    if (state->deckCount[currentPlayer] < 1) 
@@ -1329,7 +1329,7 @@ void adventurerEffect(int drawntreasure, int currentPlayer, struct gameState *st
 void smithyEffect(int currentPlayer, int handPos, struct gameState *state)
 {
     // +3 Cards
-    for (int i = 0; i <= 3; i++)
+    for (int i = 0; i < 3; i++)
 	    drawCard(currentPlayer, state);
 			
     // Discard card from hand
@@ -1357,8 +1357,8 @@ void stewardEffect(int choice1, int choice2, int choice3, int currentPlayer, int
     else
 	{
 	    // Trash 2 cards in hand
-	    discardCard(choice2, currentPlayer, state, 0);
-	    discardCard(choice3, currentPlayer, state, 0);
+	    discardCard(choice2, currentPlayer, state, 1);
+	    discardCard(choice3, currentPlayer, state, 1);
 	}
 			
     // Discard card from hand
@@ -1373,7 +1373,7 @@ void stewardEffect(int choice1, int choice2, int choice3, int currentPlayer, int
 void salvagerEffect(int choice1, int currentPlayer, int handPos, struct gameState *state)
 {
     // +1 buy
-    state->numBuys--;
+    state->numBuys++;
 			
     if (choice1)
 	{
