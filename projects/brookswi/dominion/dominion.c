@@ -1329,7 +1329,8 @@ void adventurerEffect(int drawntreasure, int currentPlayer, struct gameState *st
 void smithyEffect(int currentPlayer, int handPos, struct gameState *state)
 {
     // +3 Cards
-    for (int i = 0; i <= 3; i++)
+    int i;
+    for (i = 0; i <= 3; i++)
 	    drawCard(currentPlayer, state);
 			
     // Discard card from hand
