@@ -644,7 +644,7 @@ int getCost(int cardNumber)
 }
 
 int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
-{
+{ 
   int i;
   int j;
   int k;
@@ -1177,12 +1177,13 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 int discardCard(int handPos, int currentPlayer, struct gameState *state, int trashFlag)
 {
 	
+    
   //if card is not trashed, added to Played pile 
   if (trashFlag < 1)
-    {
+    { 
       //add card to played pile
       state->playedCards[state->playedCardCount] = state->hand[currentPlayer][handPos]; 
-      state->playedCardCount++;
+      state->playedCardCount++; 
     }
 	
   //set played card to -1
@@ -1330,7 +1331,7 @@ void smithyEffect(int currentPlayer, int handPos, struct gameState *state)
 {
     // +3 Cards
     int i;
-    for (i = 0; i <= 3; i++)
+    for (i = 0; i < 3; i++)
 	    drawCard(currentPlayer, state);
 			
     // Discard card from hand
@@ -1395,11 +1396,12 @@ void salvagerEffect(int choice1, int currentPlayer, int handPos, struct gameStat
 **************************************************************************************/
 void outpostEffect(int currentPlayer, int handPos, struct gameState *state)
 {
+      
       // Set outpost flag
       state->outpostPlayed++;
-			
+      
       // Discard card
-      discardCard(handPos, currentPlayer, state, 0);
+      discardCard(handPos, currentPlayer, state, 0); 
 } 
 
 

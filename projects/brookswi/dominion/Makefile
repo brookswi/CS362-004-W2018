@@ -18,6 +18,15 @@ badTestDrawCard: badTestDrawCard.c dominion.o rngs.o
 testBuyCard: testDrawCard.c dominion.o rngs.o
 	gcc -o testDrawCard -g  testDrawCard.c dominion.o rngs.o $(CFLAGS)
 
+randomtestoutpost: randomtestoutpost.c dominion.c
+	gcc -o randomtestoutpost randomtestoutpost.c dominion.c rngs.c $(CFLAGS)
+
+randomtestsmithy: randomtestsmithy.c dominion.c
+	gcc -o randomtestsmithy randomtestsmithy.c dominion.c rngs.c $(CFLAGS)
+
+randomtestadventurer: randomtestadventurer.c dominion.c
+	gcc -o randomtestadventurer randomtestadventurer.c dominion.c rngs.c $(CFLAGS)
+
 unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c cardtest1.c cardtest2.c cardtest3.c cardtest4.c dominion.c
 	echo "Result for running dominion test:" > unittestresults.out
 	
