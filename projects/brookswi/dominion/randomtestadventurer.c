@@ -8,200 +8,184 @@
 #include "dominion_helpers.h"
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 #include <time.h>
+#include <math.h>
+#include <assert.h>
 #include "rngs.h"
 #include <stdlib.h>
 
-// Function prototype
-int testAdventurerCard(int drawntreasure, int player, struct gameState *state, int temphand[], int z, int testCase)
-
-
-void assertTest(int val, int *tests)
+// Declare struct for keeping track of test outcomes
+struct testOutcome
 {
-    if (val == 1)
-        printf("--------TEST PASSED--------\n\n");
-    else
-        printf("--------TEST FAILED--------\n\n");
-    (*tests)++;
+    int passDrawCard;
+    int failDrawCard;
+    int passTreasure;
+    int failTreasure;
+};
+
+// Function prototype
+int testAdventurerCard(int player, int handPos, struct gameState *state, struct testOutcome *testVar);
+
+// Print test results
+void printResults(char* title, int passedTests, int failedTests)
+{ 
+    printf("-----------------------------------------------------------------------------\n");
+    printf("   TEST: %s\n", title);
+    printf("-----------------------------------------------------------------------------\n");
+    printf(" Tests passed: %d\n", passedTests);
+    printf(" Tests failed: %d\n\n", failedTests);
 }
 
 int main()
 { 
+    // TEST: Adventurer card effect
+    printf("----------------------------------------------------------------------------------------\n");
+    printf("                  RANDOM TESTING: Adventurer card effect\n");
+    printf("----------------------------------------------------------------------------------------\n\n");
+
+    // Set test variables 
+    struct testOutcome testVar;
+    testVar.passDrawCard = 0;
+    testVar.failDrawCard = 0;
+    testVar.passTreasure = 0;
+    testVar.failTreasure = 0;
+
     // Initialize RNG
     time_t t;
-    srand((unsigned) time(&t));   
+    SelectStream(2);
+    PutSeed((unsigned) time(&t));
 
-    int num, player, i;
+    int num, player, handPos, i;
 
-    int temphand[MAX_HAND];     // temphand always passed as empty array
-    int drawntreasure = 0;      // drawntreasure always passed as 0
-    int z = 0;                  // z always passed as 0
-
-    int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
-
+    // Create game state
     struct gameState state;
 
-    for (num = 0; num < 2000; num++)
-    {
+    // Number of tests
+    for (num = 0; num < 100000; num++)
+    { 
         for (i = 0; i < sizeof(struct gameState); i++)
-        {
-            ((char*) &state)[i] = rand() % 256;
+            ((char*)&state)[i] = floor(Random() * 256);
+
+        // Get random player
+        state.numPlayers = MAX_PLAYERS; 
+        player = floor(Random() * 4);
+        state.whoseTurn = player;
+      
+        // Get random deck count 
+        state.deckCount[player] = floor(Random() * MAX_DECK);
+        
+        // Add random number of treasure cards to deck 
+        int card, randDeckPos;
+        int numCards = state.deckCount[player]; 
+        for (i = 0; i < numCards; i++)
+        { 
+            card = rand() % (gold + 1 - copper) + copper;
+            randDeckPos = floor(Random() * state.deckCount[player]); 
+            state.deck[player][randDeckPos] = card;
         }
-        player = rand() % 4;
+             
+        // Get random discard count 
+        state.discardCount[player] = floor(Random() * (MAX_DECK / 2));
+    
+        // Add random number of treasure cards to discard 
+        int randDiscardPos;
+        numCards = state.discardCount[player]; 
+        for (i = 0; i < numCards; i++)
+        { 
+            card = rand() % (gold + 1 - copper) + copper;
+            randDiscardPos = floor(Random() * state.discardCount[player]); 
+            state.discard[player][randDiscardPos] = card;
+        } 
 
-        // Case 1: Deck empty, shuffle necessary
-        state.deckCount[player] = 0;
-        state.discardCount[player] = rand() % MAX_DECK;
-        state.handCount[player] = rand() % MAX_HAND; 
-        testAdventurerCard(drawntreasure, player, &state, temphand, z, 1);
+        // Get random hand count 
+        state.handCount[player] = floor(Random() * MAX_HAND);
+             
+        // Get random played card count 
+        state.playedCardCount = floor(Random() * MAX_DECK);
+      
+        // Get random hand position and set to adventurer card 
+        handPos = floor(Random() * state.handCount[player]);
+        state.hand[player][handPos] = adventurer; 
 
-        /*
-        state.deckCount[player] = rand() % MAX_DECK;
-        state.discardCount[player] = rand() % MAX_DECK;
-        state.handCount[player] = rand() % MAX_HAND; 
-        testAdventurerCard(drawntreasure, player, &state, temphand, z);
-        */
-
+        // Call test function
+        testAdventurerCard(player, handPos, &state, &testVar); 
     }
+
+    printResults("2 cards added to hand and adventurer card discarded", testVar.passDrawCard, testVar.failDrawCard);
+
+    printResults("Exactly 2 more treasure cards are in hand than before", testVar.passTreasure, testVar.failTreasure);
 
     return 0;   
 }
 
 
-
-int testAdventurerCard(int drawntreasure, int player, struct gameState *postState, int temphand[], int z, int testCase)
+int testAdventurerCard(int player, int handPos, struct gameState *postState, struct testOutcome *testVar)
 {
+    // Save game state
     struct gameState preState;
-    memcpy(&preState, postState, sizeof(struct gameState));    
+    memcpy(&preState, postState, sizeof(struct gameState));
 
-    int advResult;
-    advResult = adventurerEffect(drawntreasure, player, postState, temphand, z); 
-   
-    // Discard adventurer card
-    preState.handCount[player]--;
+    // Play adventurer card
+    cardEffect(adventurer, 0, 0, 0, postState, handPos, 0);
 
-    // Gain two treasure cards in hand
-    preState.handCount[player]++;
-
- 
-    /*
-    if (preState.discardCount[player] > 0)
-    {
-        memcpy(preState.deck[player], postState->deck[player], sizeof(int) * preState.discardCount[player]);
-        memcpy(preState.discard[player], postState->discard[player], sizeof(int) * preState.discardCount[player]);
-        preState.hand[player][postState->handCount[player]-1] = postState->hand[player][postState->handCount[player]-1];
-    }
-    */
-
-       
-
-
-
-
-
-
-    /*
-    // TEST: Adventurer card effect
-    printf("---------------------------------------------------------\n");
-    printf("              TESTING: Adventurer card effect\n");
-    printf("---------------------------------------------------------\n\n");
-
-    int passedTests = 0;
-    int failedTests = 0;
-
-    struct gameState state, testState;
-
-    int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
- 
-    // Game with max players  
-    int retValue = initializeGame(MAX_PLAYERS, k, 1, &state);
-
-    // Check that game is valid
-    assert(retValue == 0); 
- 
-    int player = 0;
     int gainCards = 2;
     int discardCards = 1;
-  
-    memcpy(&testState, &state, sizeof(struct gameState));
- 
-    cardEffect(adventurer, 0, 0, 0, &testState, 0, 0);
 
     // TEST: 2 cards added to hand and adventurer card discarded
-    printf("---------------------------------------------------------------\n");
-    printf("    TEST: 2 cards added to hand and adventurer card discarded\n"); 
-    printf("---------------------------------------------------------------\n");
-
-    printf("testState.handCount[player] = %d, expected = %d\n", testState.handCount[player], state.handCount[player] + gainCards - discardCards); 
-    if (testState.handCount[player] == state.handCount[player] + gainCards - discardCards)
-        assertTest(1, &passedTests);
-    else
-        assertTest(0, &failedTests); 
+ 
+    if (postState->handCount[player] == preState.handCount[player] + gainCards - discardCards)
+    {
+        // Print test conditions
+        printf("----------------TEST PASSED: 2 cards added to hand and adventurer card discarded---------------\n");
+        printf("TEST CONDITIONS\n");
+        printf("Player: %d   Hand Count: %d   Deck Count: %d   Discard Count: %d   Hand Position: %d\n", player + 1, preState.handCount[player], preState.deckCount[player], preState.discardCount[player], handPos);
+        testVar->passDrawCard++; 
+        printf("-----------------------------------------------------------------------------------------------\n");
+    }
+    else       
+    { 
+        testVar->failDrawCard++; 
+    }   
      
     // TEST: 2 more treasure cards are in hand than before
-    printf("-------------------------------------------------------------------\n");
-    printf("    TEST: Exactly 2 more treasure cards are in hand than before\n");
-    printf("-------------------------------------------------------------------\n");
- 
-    int handCount, preHand, postHand;
-    int maxHandCount = state.handCount[player];
+    
+    // Count number of treasure cards in pre hand
+    int handCount, preHand = 0, postHand = 0;
+    int maxHandCount = preState.handCount[player];
     for (handCount = 0; handCount < maxHandCount; handCount++)
     {
-        if (state.hand[player][handCount] == copper || state.hand[player][handCount] == silver || state.hand[player][handCount] == gold)    preHand++;
+        if (preState.hand[player][handCount] == copper || preState.hand[player][handCount] == silver || preState.hand[player][handCount] == gold) 
+            preHand++;
     }
   
-    maxHandCount = testState.handCount[player]; 
+    // Count number of treasure cards in post hand
+    maxHandCount = postState->handCount[player]; 
     for (handCount = 0; handCount < maxHandCount; handCount++)
     {
-        if (testState.hand[player][handCount] == copper || testState.hand[player][handCount] == silver || testState.hand[player][handCount] == gold)    postHand++;
+        if (postState->hand[player][handCount] == copper || postState->hand[player][handCount] == silver || postState->hand[player][handCount] == gold)    
+            postHand++;
     }
  
-    printf("Number of treasure cards in hand = %d, expected = %d\n", postHand, preHand + 2);
+    // Check if post hand has 2 more treasure cards than pre hand
     if (postHand == preHand + 2)
-        assertTest(1, &passedTests);
-    else
-        assertTest(0, &failedTests); 
-
-    // TEST: All of the non-treasure cards that were drawn have been discarded
-    printf("---------------------------------------------------------------------------------\n");
-    printf("    TEST: All of the non-treasure cards that were drawn have been discarded\n"); 
-    printf("---------------------------------------------------------------------------------\n");
- 
-    int sameCards; 
-    maxHandCount = state.handCount[player]; 
-    for (handCount = 0; handCount < maxHandCount; handCount++)
     {
-        if (testState.hand[player][handCount] == state.hand[player][handCount])
-            sameCards = 1;
-        else
-            sameCards = 0;
+        // Print test conditions
+        printf("-------------------------TEST PASSED: 2 more treasure cards in hand------------------------\n");
+        printf("TEST CONDITIONS\n");
+        printf("Player: %d   Hand Count: %d   Deck Count: %d   Discard Count: %d   Hand Position: %d\n", player + 1, preState.handCount[player], preState.deckCount[player], preState.discardCount[player], handPos);   
+        printf("-------------------------------------------------------------------------------------------\n\n");
+        testVar->passTreasure++;         
     }
-        
-    printf("Same cards as before = %d, expected = 1\n", sameCards);
-    if (sameCards == 1)
-        assertTest(1, &passedTests);
-    else
-        assertTest(0, &failedTests);  
-
-    printf("\n");
-    printf("-----------------------------------------------------\n");
-    printf("         Tests passed: %d\n", passedTests);
-    printf("-----------------------------------------------------\n");
-
-    printf("\n");
-    printf("-----------------------------------------------------\n");
-    printf("         Tests failed: %d\n", failedTests);
-    printf("-----------------------------------------------------\n");
-
+    else 
+    { 
+        testVar->failTreasure++; 
+    }
+           
     return 0;
-    */
 }
 
-     
-
-    
-    
 
 
-    
+
+
+

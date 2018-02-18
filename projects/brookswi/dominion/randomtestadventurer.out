@@ -1,3 +1,45 @@
+----------------------------------------------------------------------------------------
+                  RANDOM TESTING: Adventurer card effect
+----------------------------------------------------------------------------------------
+
+----------------TEST PASSED: 2 cards added to hand and adventurer card discarded---------------
+TEST CONDITIONS
+Player: 1   Hand Count: 121   Deck Count: 0   Discard Count: 1   Hand Position: 47
+-----------------------------------------------------------------------------------------------
+-------------------------TEST PASSED: 2 more treasure cards in hand------------------------
+TEST CONDITIONS
+Player: 3   Hand Count: 121   Deck Count: 3   Discard Count: 0   Hand Position: 86
+-------------------------------------------------------------------------------------------
+
+-------------------------TEST PASSED: 2 more treasure cards in hand------------------------
+TEST CONDITIONS
+Player: 1   Hand Count: 233   Deck Count: 0   Discard Count: 4   Hand Position: 139
+-------------------------------------------------------------------------------------------
+
+-------------------------TEST PASSED: 2 more treasure cards in hand------------------------
+TEST CONDITIONS
+Player: 1   Hand Count: 215   Deck Count: 3   Discard Count: 2   Hand Position: 86
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+   TEST: 2 cards added to hand and adventurer card discarded
+-----------------------------------------------------------------------------
+ Tests passed: 1
+ Tests failed: 99999
+
+-----------------------------------------------------------------------------
+   TEST: Exactly 2 more treasure cards are in hand than before
+-----------------------------------------------------------------------------
+ Tests passed: 3
+ Tests failed: 99997
+
+File 'dominion.c'
+Lines executed:12.79% of 563
+Branches executed:12.71% of 417
+Taken at least once:7.91% of 417
+Calls executed:7.37% of 95
+Creating 'dominion.c.gcov'
+
         -:    0:Source:dominion.c
         -:    0:Graph:dominion.gcno
         -:    0:Data:dominion.gcda

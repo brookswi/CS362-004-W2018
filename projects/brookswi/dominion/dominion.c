@@ -1295,11 +1295,11 @@ void adventurerEffect(int drawntreasure, int currentPlayer, struct gameState *st
         // If the deck is empty we need to shuffle discard and add to deck
 	    if (state->deckCount[currentPlayer] < 1) 
 	        shuffle(currentPlayer, state);
-	    
-        drawCard(currentPlayer, state);
+	     
+        drawCard(currentPlayer, state); 
 
         // Top card of hand is most recently drawn card.
-	    cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer] - 1];
+	    cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer] - 1];  
 
 	    if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
 	        drawntreasure++;
@@ -1314,12 +1314,13 @@ void adventurerEffect(int drawntreasure, int currentPlayer, struct gameState *st
 	    }
     }
       
+    //printf("%d\n", z);
     while(z - 1 >= 0)
     {
-        // Discard all cards in play that have been drawn
-	    state->discard[currentPlayer][state->discardCount[currentPlayer]++] = temphand[z - 1]; 
+        // Discard all cards in play that have been drawn     
+	    state->discard[currentPlayer][state->discardCount[currentPlayer]++] = temphand[z - 1];    
 	    z = z - 1;
-    }
+    } 
 }
 
 
@@ -1331,7 +1332,7 @@ void smithyEffect(int currentPlayer, int handPos, struct gameState *state)
 {
     // +3 Cards
     int i;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i <= 3; i++)
 	    drawCard(currentPlayer, state);
 			
     // Discard card from hand

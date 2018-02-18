@@ -18,14 +18,23 @@ badTestDrawCard: badTestDrawCard.c dominion.o rngs.o
 testBuyCard: testDrawCard.c dominion.o rngs.o
 	gcc -o testDrawCard -g  testDrawCard.c dominion.o rngs.o $(CFLAGS)
 
-randomtestoutpost: randomtestoutpost.c dominion.c
-	gcc -o randomtestoutpost randomtestoutpost.c dominion.c rngs.c $(CFLAGS)
+randomtestcard1.out: randomtestcard1.c dominion.c
+	gcc -o randomtestcard1 randomtestcard1.c dominion.c rngs.c $(CFLAGS)
+	./randomtestcard1 > randomtestcard1.out
+	gcov dominion.c -b >> randomtestcard1.out 
+	cat dominion.c.gcov >> randomtestcard1.out
 
-randomtestsmithy: randomtestsmithy.c dominion.c
-	gcc -o randomtestsmithy randomtestsmithy.c dominion.c rngs.c $(CFLAGS)
+randomtestcard2.out: randomtestcard2.c dominion.c
+	gcc -o randomtestcard2 randomtestcard2.c dominion.c rngs.c $(CFLAGS)
+	./randomtestcard2 > randomtestcard2.out
+	gcov dominion.c -b >> randomtestcard2.out
+	cat dominion.c.gcov >> randomtestcard2.out
 
-randomtestadventurer: randomtestadventurer.c dominion.c
-	gcc -o randomtestadventurer randomtestadventurer.c dominion.c rngs.c $(CFLAGS)
+randomtestadventurer.out: randomtestadventurer.c dominion.c
+	gcc -o randomtestadventurer randomtestadventurer.c dominion.c rngs.c -g $(CFLAGS)
+	./randomtestadventurer > randomtestadventurer.out
+	gcov dominion.c -b >> randomtestadventurer.out
+	cat dominion.c.gcov >> randomtestadventurer.out
 
 unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c cardtest1.c cardtest2.c cardtest3.c cardtest4.c dominion.c
 	echo "Result for running dominion test:" > unittestresults.out

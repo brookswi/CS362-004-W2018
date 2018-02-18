@@ -20,7 +20,11 @@ int testOutpostCard(int player, int handPos, struct gameState *state, int* passe
 void assertTest(int val, int *tests)
 {
     if (val == 1)
-        printf("--------TEST PASSED--------\n\n");
+    {
+        // Suppress output
+        ;
+        //printf("--------TEST PASSED--------\n\n");
+    }
     else
         printf("--------TEST FAILED--------\n\n");
     (*tests)++;
@@ -28,15 +32,20 @@ void assertTest(int val, int *tests)
 
 int main()
 { 
+    // TEST: Outpost card effect
+    printf("----------------------------------------------------------------------------\n");
+    printf("                RANDOM TESTING: Outpost card effect\n");
+    printf("----------------------------------------------------------------------------\n\n");
+
+
     // Keep track of tests
     int passedTests = 0;
     int failedTests = 0;
 
     // Initialize RNG
-    //time_t t;
-    //srand((unsigned) time(&t));   
+    time_t t;
     SelectStream(2);
-    PutSeed(3);
+    PutSeed((unsigned) time(&t));
 
     int num, player, handPos, i;
 
@@ -44,58 +53,32 @@ int main()
     struct gameState state;
 
     // Number of tests
-    for (num = 0; num < 1000; num++)
+    for (num = 0; num < 100000; num++)
     {
         for (i = 0; i < sizeof(struct gameState); i++)
             ((char*)&state)[i] = floor(Random() * 256);
 
         // Get random player
-        state.numPlayers = MAX_PLAYERS;
-        //player = rand() % 4; 
+        state.numPlayers = MAX_PLAYERS; 
         player = floor(Random() * 4);
         state.whoseTurn = player;
       
-        // Fill deck with random cards
-        //state.deckCount[player] = rand() % MAX_DECK;
+        // Get random deck count 
         state.deckCount[player] = floor(Random() * MAX_DECK);
-        /*
-        int deckCount = state.deckCount[player];
-        for (i = 0; i < deckCount; i++)
-            state.deck[player][i] = rand() % treasure_map;
-        */
-
-        // Fill discard with random cards
-        //state.discardCount[player] = rand() % MAX_DECK; 
+                
+        // Get random discard count 
         state.discardCount[player] = floor(Random() * MAX_DECK);
-        /*
-        int discardCount = state.discardCount[player];
-        for (i = 0; i < discardCount; i++)
-            state.discard[player][i] = rand() % treasure_map;
-        */
-
-        // Fill hand with random cards
-        //state.handCount[player] = rand() % MAX_HAND; 
-        state.handCount[player] = floor(Random() * MAX_HAND);
-        /*
-        int handCount = state.handCount[player];
-        for (i = 0; i < handCount; i++)
-            state.hand[player][i] = rand() % treasure_map;
-        */
         
-        // Fill played cards with random cards
-        //state.playedCardCount = rand() % MAX_DECK;
+        // Get random hand count 
+        state.handCount[player] = floor(Random() * MAX_HAND);
+                
+        // Get random played card count 
         state.playedCardCount = floor(Random() * MAX_DECK);
-        /*
-        int playedCardCount = state.playedCardCount;
-        for (i = 0; i < playedCardCount; i++)
-            state.playedCards[i] = rand() % treasure_map;
-        */
-
+        
         // Set outpost flag to 0
         state.outpostPlayed = 0;
 
-        // Get random hand position and set to outpost card
-        //handPos = rand() % state.handCount[player];
+        // Get random hand position and set to outpost card 
         handPos = floor(Random() * state.handCount[player]);
         state.hand[player][handPos] = outpost; 
 
@@ -125,17 +108,18 @@ int testOutpostCard(int player, int handPos, struct gameState *postState, int* p
 
     // Play outpost card
     cardEffect(outpost, 0, 0, 0, postState, handPos, 0);
-    //outpostEffect(player, handPos, postState);
 
+    // Save preState variables
+    int preHandCount = preState.handCount[player];
+    int preDeckCount = preState.deckCount[player];
+    int preDiscardCount = preState.discardCount[player];
 
     /* Simulate outpost card effects on preState */
 
     // Set outpost flag
     preState.outpostPlayed++;
      
-    // Discard outpost card 
-    //discardCard(handPos, player, &preState, 0);
-    
+    // Discard outpost card   
     preState.playedCards[preState.playedCardCount] = preState.hand[player][handPos];
     preState.playedCardCount++;
 
@@ -159,21 +143,14 @@ int testOutpostCard(int player, int handPos, struct gameState *postState, int* p
     if (memcmp(&preState, postState, sizeof(struct gameState)) == 0)     
         assertTest(1, passedTests);  
     else 
+    { 
         assertTest(0, failedTests); 
-  
-    /*
-    if (preState.outpostPlayed == postState->outpostPlayed)
-        assertTest(1, passedTests);
-    else
-        assertTest(0, failedTests);
-    */
-   /* 
-    if (preState.handCount[player] == postState->handCount[player])
-        assertTest(1, passedTests);
-    else
-        assertTest(0, failedTests);
-    */
-        
+
+        // Print test conditions 
+        printf("TEST CONDITIONS\n");
+        printf("Player: %d   Hand Count: %d   Deck Count: %d   Discard Count: %d   Hand Position: %d\n", player + 1, preHandCount, preDeckCount, preDiscardCount, handPos);
+    }
+          
     return 0;
 }
 
