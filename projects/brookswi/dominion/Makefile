@@ -30,11 +30,8 @@ randomtestcard2.out: randomtestcard2.c dominion.c
 	gcov dominion.c -b >> randomtestcard2.out
 	cat dominion.c.gcov >> randomtestcard2.out
 
-randomtestadventurer.out: randomtestadventurer.c dominion.c
+randomtestadventurer: randomtestadventurer.c dominion.c
 	gcc -o randomtestadventurer randomtestadventurer.c dominion.c rngs.c -g $(CFLAGS)
-	./randomtestadventurer > randomtestadventurer.out
-	gcov dominion.c -b >> randomtestadventurer.out
-	cat dominion.c.gcov >> randomtestadventurer.out
 
 unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c cardtest1.c cardtest2.c cardtest3.c cardtest4.c dominion.c
 	echo "Result for running dominion test:" > unittestresults.out
