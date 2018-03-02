@@ -6,13 +6,29 @@ Function: int adventurerEffect(struct gameState *state)
 
 Location: Line 1158, z++ located after else condition and before tempHand[z]=cardDrawn
 
-Description: In the adventurerEffect function, the z variable, which serves as a counter for the temp hand that holds all of the non-treasure cards drawn by the player, is incremented before tempHand[z]=cardDrawn is called. The z variable is originally set to 0 so that the first call to tempHand[z] will reference the first entry in tempHand at the zeroth index. Because the z variable is incremented before this call, that first entry is skipped over and the meaningful entries in the array begin at the 1st index. This doesn't become a problem until later in the while(z-1>=0) loop whose purpose is to add all entries in the tempHand array to the discard pile. When the while loop reaches its last iteration where z = 1, tempHand[z-1] or tempHand[0] is called and that 0th index is referenced. The game state expects there to be an int in that index that represents some card, but instead it contains whatever it contained after creating tempHand due to it never being set to any value. After running through multiple iterations of randomtestadventurer.c with gdb and checking the value in tempHand[0], it seems that the value is always equal to 0. Therefore, the game will behave as if there is a curse card in that spot and thus an extra curse card that was not meant to exist will be added to the discard pile with each call to adventurerEffect. This can effect the game in many unforeseen ways and is a pretty difficult bug to catch with testing.
+Description: In the adventurerEffect function, the z variable, which serves as a counter for the temp hand that holds all of the 
+non-treasure cards drawn by the player, is incremented before tempHand[z]=cardDrawn is called. The z variable is originally set 
+to 0 so that the first call to tempHand[z] will reference the first entry in tempHand at the zeroth index. Because the z variable 
+is incremented before this call, that first entry is skipped over and the meaningful entries in the array begin at the 1st index. 
+This doesn't become a problem until later in the while(z-1>=0) loop whose purpose is to add all entries in the tempHand array to 
+the discard pile. When the while loop reaches its last iteration where z = 1, tempHand[z-1] or tempHand[0] is called and that 0th 
+index is referenced. The game state expects there to be an int in that index that represents some card, but instead it contains 
+whatever it contained after creating tempHand due to it never being set to any value. After running through multiple iterations 
+of randomtestadventurer.c with gdb and checking the value in tempHand[0], it seems that the value is always equal to 0. Therefore, 
+the game will behave as if there is a curse card in that spot and thus an extra curse card that was not meant to exist will be added 
+to the discard pile with each call to adventurerEffect. This can effect the game in many unforeseen ways and is a pretty difficult bug 
+to catch with testing.
 
-How it was found: My tests were not able to determine this bug in a direct way. I instead noticed that when I ran randomtestadventurer.c on my own dominion.c code, it executed 100,000 tests with no errors or segmentation faults. But when I ran the same test on this code, it was not able to execute all tests. I had to examine the source code manually to determine the bug. 
+How it was found: My tests were not able to determine this bug in a direct way. I instead noticed that when I ran randomtestadventurer.c 
+on my own dominion.c code, it executed 100,000 tests with no errors or segmentation faults. But when I ran the same test on this code, 
+it was not able to execute all tests. I had to examine the source code manually to determine the bug. 
 
-Estimated Severity: High. The impact of this bug is not contained entirely within the adventurerEffect function. It causes the types of cards present in the game to become unpredictable and also has the potential to cause issues with memory addressing and potentially cause a segmentation fault in extreme circumstances.
+Estimated Severity: High. The impact of this bug is not contained entirely within the adventurerEffect function. It causes the types 
+of cards present in the game to become unpredictable and also has the potential to cause issues with memory addressing and potentially 
+cause a segmentation fault in extreme circumstances.
 
-Estimated Priority: High. Correction of the bug is trivial and only requires moving the z++ to after the state->handCount[currentPlayer]-- line. It should be corrected as soon as possible.
+Estimated Priority: High. Correction of the bug is trivial and only requires moving the z++ to after the state->handCount[currentPlayer]-- 
+line. It should be corrected as soon as possible.
 
 
 Bug 2:
@@ -21,13 +37,20 @@ Function: int adventurerEffect(struct gameState *state)
 
 Location: Bug is due to nonexistent code, not a mistake in current code
 
-Description: One of the jobs of the adventurerEffect function is to remove the adventurer card from the player's hand and add it to the discard pile. There is no call to discardCard anywhere in the adventurerEffect function, so this action never takes place.
+Description: One of the jobs of the adventurerEffect function is to remove the adventurer card from the player's hand and add it to 
+the discard pile. There is no call to discardCard anywhere in the adventurerEffect function, so this action never takes place.
 
-How it was found: Both my randomtestadventurer.c and cardtest2.c files check that a card is discarded whenever the adventurerEffect function is called.
+How it was found: Both my randomtestadventurer.c and cardtest2.c files check that a card is discarded whenever the adventurerEffect 
+function is called.
 
-Estimated Severity: High. Not discarding the card from the player's hand means that the player will always have the adventurer card present in their hand. This will likely not cause any problems such as segmentation faults, but it creates a problem that makes the game almost unplayable. If a player always has an adventurer card in their hand, they can play it every hand and thus gain treasure cards indefinitely.
+Estimated Severity: High. Not discarding the card from the player's hand means that the player will always have the adventurer card 
+present in their hand. This will likely not cause any problems such as segmentation faults, but it creates a problem that makes the 
+game almost unplayable. If a player always has an adventurer card in their hand, they can play it every hand and thus gain treasure 
+cards indefinitely.
 
-Estimated priority: High. The game could not be released as a completed product until this bug is fixed, as it offers a significant advantage to a player with an adventurer card. It can also be fixed relatively quickly, by just adding discardCard(handPos, currentPlayer, state, 0) right before the return statement at the end of the function. 
+Estimated priority: High. The game could not be released as a completed product until this bug is fixed, as it offers a significant 
+advantage to a player with an adventurer card. It can also be fixed relatively quickly, by just adding discardCard(handPos, currentPlayer, 
+state, 0) right before the return statement at the end of the function. 
 
 Bug 3:
 
@@ -35,11 +58,19 @@ Function: int smithyEffect(struct gameState *state, int handPos)
 
 Location: Line 1254, i <= 3 in for loop
 
-Description: In the smithyEffect function, the for loop that is meant to draw 3 cards actually runs through 4 iterations. So, 4 cards are drawn every time smithyEffect is called. This bug was very easy to find with my existing test suites because drawing 3 cards is the main functionality of the smithy card and was thus one of the first things my tests look for. 
+Description: In the smithyEffect function, the for loop that is meant to draw 3 cards actually runs through 4 iterations. So, 4 cards are 
+drawn every time smithyEffect is called. This bug was very easy to find with my existing test suites because drawing 3 cards is the main 
+functionality of the smithy card and was thus one of the first things my tests look for. 
 
-How it was found: Both my cardtest1.c and randomtestcard1.c files test for whether exactly 3 cards are drawn when the smithy card is played, and this bug was found in each test.
+How it was found: Both my cardtest1.c and randomtestcard1.c files test for whether exactly 3 cards are drawn when the smithy card is played, 
+and this bug was found in each test.
 
-Estimated Severity: Medium. The effects of the smithy card are simple, draw 3 cards and discard the smithy card. This bug causes 4 cards to be drawn, so the most significant job of the smithy card is performed incorrectly. It however is not a game breaking bug, which is why I rate its severity as medium instead of high. It merely performs its job incorrectly, but the way it performs it is consistent with regular operation of the game. There is nothing about drawing 4 cards instead of 3 that will break some aspect of the game in unforeseen ways later on.
+Estimated Severity: Medium. The effects of the smithy card are simple, draw 3 cards and discard the smithy card. This bug causes 4 cards to 
+be drawn, so the most significant job of the smithy card is performed incorrectly. It however is not a game breaking bug, which is why I 
+rate its severity as medium instead of high. It merely performs its job incorrectly, but the way it performs it is consistent with regular 
+operation of the game. There is nothing about drawing 4 cards instead of 3 that will break some aspect of the game in unforeseen ways later 
+on.
 
-Estimated priority: High. The effects of all cards should be consistent with Dominion cards. This is essential if this game claims to be an instance of the Dominion brand. Also, correction of the bug is trivial as it only requires changing the <= to <.
+Estimated priority: High. The effects of all cards should be consistent with Dominion cards. This is essential if this game claims to be an 
+instance of the Dominion brand. Also, correction of the bug is trivial as it only requires changing the <= to <.
 
